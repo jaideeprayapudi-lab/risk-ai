@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Are you AI-ready? — assess your risk and readiness</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #1a1916;
+  --ink2: #5a5850;
+  --ink3: #9a9890;
+  --surface: #f7f5f0;
+  --card: #ffffff;
+  --border: rgba(26,25,22,0.1);
+  --accent: #2a5a8c;
+  --accent-light: #eef4fb;
+  --amber: #b8750a;
+  --amber-light: #fdf6e3;
+  --red: #a33020;
+  --red-light: #fdf0ee;
+  --green: #1D7a55;
+  --green-light: #eaf7f2;
+  --r: 12px;
+}
+
+body {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  background: var(--surface);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem 5rem;
+}
+
+.app { width: 100%; max-width: 580px; }
+
+.header { text-align: center; margin-bottom: 2.5rem; }
+.logo { font-size: 13px; font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 500; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.5rem; }
+.headline { font-size: 30px; font-weight: 400; color: var(--ink); letter-spacing: -.03em; line-height: 1.2; margin-bottom: .75rem; }
+.subline { font-size: 15px; color: var(--ink2); font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; max-width: 440px; margin: 0 auto; }
+
+.progress-wrap { margin-bottom: 2rem; }
+.progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s ease; }
+.progress-label { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: var(--ink3); margin-top: 6px; text-align: right; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 2rem;
+  animation: fadeUp .3s ease;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+.q-label { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 500; color: var(--ink3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: .6rem; }
+.q-text { font-size: 19px; font-weight: 400; color: var(--ink); letter-spacing: -.02em; line-height: 1.4; margin-bottom: 1.75rem; }
+
+.options { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 16px; border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer; transition: all .2s;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+.opt:hover { border-color: var(--accent); background: var(--accent-light); }
+.opt.sel { border-color: var(--accent); background: var(--accent-light); }
+.opt-letter {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500; color: var(--ink3);
+  flex-shrink: 0; margin-top: 1px; transition: all .2s;
+}
+.opt.sel .opt-letter { background: var(--accent); border-color: var(--accent); color: white; }
+.opt-text { font-size: 14px; color: var(--ink); line-height: 1.5; }
+.opt-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+
+.nav { display: flex; gap: 10px; margin-top: 1.5rem; align-items: center; }
+.btn-next {
+  flex: 1; height: 48px; background: var(--ink); color: white;
+  border: none; border-radius: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: opacity .2s; opacity: .4; pointer-events: none;
+}
+.btn-next.ready { opacity: 1; pointer-events: all; }
+.btn-next.ready:hover { opacity: .85; }
+.btn-back-sm {
+  height: 48px; padding: 0 16px; background: none;
+  border: 1px solid var(--border); border-radius: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--ink3);
+  cursor: pointer; transition: all .2s;
+}
+.btn-back-sm:hover { color: var(--ink); border-color: var(--ink3); }
+
+/* Intro */
+.intro-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 1.5rem 0; }
+.intro-tile { background: var(--surface); border-radius: 10px; padding: 14px; }
+.intro-tile-label { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: var(--ink3); margin-bottom: 4px; }
+.intro-tile-val { font-size: 14px; color: var(--ink); font-weight: 400; }
+.btn-start {
+  width: 100%; height: 52px; background: var(--accent); color: white;
+  border: none; border-radius: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 16px; font-weight: 500;
+  cursor: pointer; transition: opacity .2s; margin-top: 1rem;
+}
+.btn-start:hover { opacity: .88; }
+
+/* Role input */
+.role-input {
+  width: 100%; height: 48px; padding: 0 14px;
+  border: 1px solid var(--border); border-radius: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 15px; color: var(--ink);
+  background: var(--surface); outline: none; margin-bottom: 1rem; transition: border .2s;
+}
+.role-input:focus { border-color: var(--accent); }
+.for-org {
+  background: var(--accent-light); border: 1px solid rgba(42,90,140,.15);
+  border-radius: 10px; padding: 12px 14px; margin-top: 1rem;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--accent);
+  line-height: 1.5;
+}
+.for-org a { color: var(--accent); font-weight: 500; }
+
+/* Results */
+.result-hero { text-align: center; padding: 1.5rem 0 1rem; }
+.risk-badge {
+  display: inline-block; padding: 6px 18px; border-radius: 99px;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1rem;
+}
+.risk-urgent { background: var(--red-light); color: var(--red); }
+.risk-moderate { background: var(--amber-light); color: var(--amber); }
+.risk-positioned { background: var(--green-light); color: var(--green); }
+
+.result-title { font-size: 26px; font-weight: 400; color: var(--ink); letter-spacing: -.03em; line-height: 1.3; margin-bottom: .75rem; }
+.result-para { font-size: 15px; color: var(--ink2); font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.7; }
+
+.dim-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin: 1.5rem 0; }
+.dim { background: var(--surface); border-radius: 10px; padding: 14px; text-align: center; }
+.dim-label { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: var(--ink3); margin-bottom: 8px; }
+.dim-score { font-size: 28px; font-weight: 400; color: var(--ink); letter-spacing: -.03em; }
+.dim-max { font-size: 13px; color: var(--ink3); }
+.dim-bar { height: 4px; border-radius: 2px; background: var(--border); margin-top: 8px; overflow: hidden; }
+.dim-fill { height: 100%; border-radius: 2px; }
+
+.section-head { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 500; color: var(--ink3); letter-spacing: .08em; text-transform: uppercase; margin: 1.5rem 0 .75rem; }
+
+.insight-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+.insight { display: flex; gap: 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--ink2); line-height: 1.5; }
+.insight-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
+
+.cta-box {
+  border-radius: 12px; padding: 1.5rem; margin-top: 1.25rem; margin-bottom: .75rem;
+}
+.cta-ind { background: var(--accent-light); border: 1px solid rgba(42,90,140,.15); }
+.cta-org { background: var(--surface); border: 1px solid var(--border); }
+.cta-title { font-size: 17px; font-weight: 400; color: var(--ink); letter-spacing: -.02em; margin-bottom: .4rem; }
+.cta-sub { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--ink2); line-height: 1.6; margin-bottom: 1rem; }
+.btn-cta-primary {
+  display: block; width: 100%; height: 48px;
+  background: var(--accent); color: white; border: none; border-radius: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: center; line-height: 48px; text-decoration: none; transition: opacity .2s;
+}
+.btn-cta-primary:hover { opacity: .88; }
+.btn-cta-sec {
+  display: block; width: 100%; height: 44px;
+  background: none; color: var(--accent); border: 1px solid rgba(42,90,140,.3); border-radius: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; text-align: center; line-height: 44px; text-decoration: none; margin-top: 8px; transition: all .2s;
+}
+.btn-cta-sec:hover { background: var(--accent-light); }
+
+.restart { display: block; width: 100%; height: 44px; background: none; border: 1px solid var(--border); border-radius: 10px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: var(--ink3); cursor: pointer; margin-top: .75rem; transition: all .2s; }
+.restart:hover { color: var(--ink); border-color: var(--ink3); }
+
+.disclaimer { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; color: var(--ink3); text-align: center; margin-top: 2rem; line-height: 1.7; max-width: 420px; margin-left: auto; margin-right: auto; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">Jaideep Rayapudi · AI Readiness</div>
+    <h1 class="headline">How ready are you<br>for the AI shift?</h1>
+    <p class="subline">A 12-question assessment that shows where you stand — and what to do about it.</p>
+  </div>
+  <div class="progress-wrap" id="prog-wrap" style="display:none">
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="progress-label" id="prog-label"></div>
+  </div>
+  <div id="main"></div>
+</div>
+
+<script>
+const orgQuestions = [
+  {
+    cat: 'Workforce exposure',
+    text: 'What proportion of your workforce spends most of their time on documentation, reporting, data entry, or structured information work?',
+    opts: [
+      { text: 'More than 60%', sub: 'Large administrative, clinical documentation, or back-office workforce', score: 4 },
+      { text: '30–60%', sub: 'Significant but not dominant', score: 3 },
+      { text: '10–30%', sub: 'A minority of roles', score: 2 },
+      { text: 'Less than 10%', sub: 'Mostly hands-on, relational, or highly specialised work', score: 1 }
+    ]
+  },
+  {
+    cat: 'Workforce exposure',
+    text: 'How much of your organisation\'s core work follows established protocols, guidelines, or decision frameworks — rather than open-ended judgment?',
+    opts: [
+      { text: 'Almost all — we operate in a highly structured, rule-based environment', sub: '', score: 4 },
+      { text: 'A majority — protocols dominate with some discretion', sub: '', score: 3 },
+      { text: 'Mixed — structured and unstructured work coexist', sub: '', score: 2 },
+      { text: 'Mostly discretionary — outcomes depend heavily on human judgment', sub: '', score: 1 }
+    ]
+  },
+  {
+    cat: 'Workforce exposure',
+    text: 'How many of your roles involve regular client or patient-facing communication as the primary value delivered?',
+    opts: [
+      { text: 'A minority — most work is internal or backend', sub: 'Higher AI exposure', score: 4 },
+      { text: 'Roughly half', sub: '', score: 3 },
+      { text: 'Most roles are people-facing', sub: '', score: 2 },
+      { text: 'Almost all roles — human connection is core', sub: 'Lower AI exposure', score: 1 }
+    ]
+  },
+  {
+    cat: 'AI awareness',
+    text: 'What is the current state of AI awareness among your senior leadership team?',
+    opts: [
+      { text: 'Actively engaged — leadership is experimenting and has a position', sub: '', score: 1 },
+      { text: 'Aware and monitoring — watching how it develops', sub: '', score: 2 },
+      { text: 'Limited awareness — AI is not yet on the leadership agenda', sub: '', score: 3 },
+      { text: 'Resistant or dismissive — AI is seen as irrelevant or overhyped', sub: '', score: 4 }
+    ]
+  },
+  {
+    cat: 'AI awareness',
+    text: 'Has your organisation conducted any formal assessment, workshop, or training on AI and its implications for your sector?',
+    opts: [
+      { text: 'Yes — structured programs already underway', sub: '', score: 1 },
+      { text: 'Informal conversations and awareness, but nothing structured', sub: '', score: 2 },
+      { text: 'Planned but not yet started', sub: '', score: 3 },
+      { text: 'Not at all', sub: '', score: 4 }
+    ]
+  },
+  {
+    cat: 'AI awareness',
+    text: 'What proportion of your staff currently use any AI tools — even informally — in their work?',
+    opts: [
+      { text: 'A meaningful number — it\'s becoming normalised', sub: '30%+', score: 1 },
+      { text: 'A few early adopters', sub: 'Maybe 10–30%', score: 2 },
+      { text: 'Very few', sub: 'Under 10%, mostly informal', score: 3 },
+      { text: 'Essentially none', sub: '', score: 4 }
+    ]
+  },
+  {
+    cat: 'Change capacity',
+    text: 'How has your organisation typically responded to major operational or technology changes in the past?',
+    opts: [
+      { text: 'We have managed change well — structured, communicated, adopted', sub: '', score: 1 },
+      { text: 'Mixed — some changes landed well, others were difficult', sub: '', score: 2 },
+      { text: 'Change has generally been slow and met with resistance', sub: '', score: 3 },
+      { text: 'We have a significant change fatigue or cultural resistance problem', sub: '', score: 4 }
+    ]
+  },
+  {
+    cat: 'Change capacity',
+    text: 'Does your organisation have dedicated capacity — budget, HR bandwidth, or leadership attention — to invest in workforce capability building right now?',
+    opts: [
+      { text: 'Yes — and there is appetite to deploy it on future-readiness', sub: '', score: 1 },
+      { text: 'Limited but possible — with the right case', sub: '', score: 2 },
+      { text: 'Tight — competing priorities constrain this', sub: '', score: 3 },
+      { text: 'No meaningful capacity at the moment', sub: '', score: 4 }
+    ]
+  },
+  {
+    cat: 'Change capacity',
+    text: 'How would you describe staff sentiment around AI in your organisation?',
+    opts: [
+      { text: 'Largely curious and open', sub: '', score: 1 },
+      { text: 'Mixed — some enthusiasm, some anxiety', sub: '', score: 2 },
+      { text: 'Predominantly anxious or resistant', sub: '', score: 3 },
+      { text: 'The topic hasn\'t been raised openly yet', sub: '', score: 4 }
+    ]
+  },
+  {
+    cat: 'Strategic position',
+    text: 'Does your organisation have a stated position or strategy on AI — even at a high level?',
+    opts: [
+      { text: 'Yes — a defined strategy with ownership and timelines', sub: '', score: 1 },
+      { text: 'An informal position but nothing documented', sub: '', score: 2 },
+      { text: 'It\'s on the agenda but no position yet', sub: '', score: 3 },
+      { text: 'No position — this is new territory for leadership', sub: '', score: 4 }
+    ]
+  }
+];
+
+const questions = [
+  {
+    dim: 'exposure', dimLabel: 'Task exposure',
+    text: 'How much of your typical workday involves creating documents, reports, summaries, or structured written outputs?',
+    opts: [
+      { text: 'Almost all of it', sub: 'Majority of my output is written/documented', score: 4 },
+      { text: 'A significant portion', sub: 'Maybe half my day', score: 3 },
+      { text: 'Some, but not the core', sub: 'Occasional reports or notes', score: 2 },
+      { text: 'Rarely', sub: 'My work is mostly hands-on or relationship-based', score: 1 }
+    ]
+  },
+  {
+    dim: 'exposure', dimLabel: 'Task exposure',
+    text: 'How much of your work involves finding, processing, or communicating information that already exists somewhere?',
+    opts: [
+      { text: 'That describes most of what I do', sub: 'Research, synthesis, briefing, reporting', score: 4 },
+      { text: 'A meaningful part', sub: 'Regularly look things up and relay them', score: 3 },
+      { text: 'Some', sub: 'Occasional information work', score: 2 },
+      { text: 'Not really', sub: 'I generate new knowledge or work with physical reality', score: 1 }
+    ]
+  },
+  {
+    dim: 'exposure', dimLabel: 'Task exposure',
+    text: 'How often do you make decisions by applying established rules, criteria, or protocols — rather than pure judgment?',
+    opts: [
+      { text: 'Almost always', sub: 'Clear guidelines govern most of my decisions', score: 4 },
+      { text: 'Often', sub: 'Rules matter but judgment fills the gaps', score: 3 },
+      { text: 'Sometimes', sub: 'Judgment is central but frameworks help', score: 2 },
+      { text: 'Rarely', sub: 'My decisions are deeply contextual and unpredictable', score: 1 }
+    ]
+  },
+  {
+    dim: 'exposure', dimLabel: 'Task exposure',
+    text: 'If you had to train someone to do your job, how much of it could you describe in a clear, step-by-step way?',
+    opts: [
+      { text: 'Most of it', sub: 'The work follows learnable patterns', score: 4 },
+      { text: 'A good portion', sub: 'Core tasks are teachable; some judgment required', score: 3 },
+      { text: 'Parts of it', sub: 'A lot depends on experience and feel', score: 2 },
+      { text: 'Very little', sub: 'Hard to articulate — it takes years to develop', score: 1 }
+    ]
+  },
+  {
+    dim: 'adaptability', dimLabel: 'Adaptability',
+    text: 'When your organisation has changed tools, processes, or ways of working in the past — how did you typically respond?',
+    opts: [
+      { text: 'I leaned in early', sub: 'Often among the first to adopt and figure it out', score: 1 },
+      { text: 'I adapted when it became clear it was needed', sub: 'Not first, but not last either', score: 2 },
+      { text: 'I adjusted eventually, but with resistance', sub: 'Change is uncomfortable but I get there', score: 3 },
+      { text: 'I found it difficult and disruptive', sub: 'Prefer stability and proven ways', score: 4 }
+    ]
+  },
+  {
+    dim: 'adaptability', dimLabel: 'Adaptability',
+    text: 'In the last two years, how often have you actively sought out new skills or knowledge for your own development — unprompted?',
+    opts: [
+      { text: 'Regularly — it\'s a habit', sub: 'Courses, reading, experimenting on my own', score: 1 },
+      { text: 'Occasionally', sub: 'When something clearly relevant comes up', score: 2 },
+      { text: 'Rarely', sub: 'Mostly when required by my role', score: 3 },
+      { text: 'Not really', sub: 'My current knowledge feels sufficient', score: 4 }
+    ]
+  },
+  {
+    dim: 'adaptability', dimLabel: 'Adaptability',
+    text: 'When you encounter a problem or question and don\'t know the answer, what do you typically do?',
+    opts: [
+      { text: 'I actively explore until I find a way', sub: 'Figuring things out energises me', score: 1 },
+      { text: 'I look for help or resources', sub: 'Ask around, search, find someone who knows', score: 2 },
+      { text: 'I wait for guidance', sub: 'Prefer to have direction before proceeding', score: 3 },
+      { text: 'I work around it or leave it', sub: 'Uncertainty slows me down significantly', score: 4 }
+    ]
+  },
+  {
+    dim: 'adaptability', dimLabel: 'Adaptability',
+    text: 'How do you feel about the idea of your role changing substantially in the next 3 years?',
+    opts: [
+      { text: 'Genuinely excited — I want it to evolve', sub: '', score: 1 },
+      { text: 'Cautiously open', sub: 'Change is okay if the direction is clear', score: 2 },
+      { text: 'Anxious but accepting', sub: 'I know it\'s coming but it worries me', score: 3 },
+      { text: 'Resistant', sub: 'I\'d prefer my role to stay as it is', score: 4 }
+    ]
+  },
+  {
+    dim: 'agency', dimLabel: 'AI agency',
+    text: 'How often do you currently use AI tools (ChatGPT, Copilot, Gemini, etc.) in your work or personal productivity?',
+    opts: [
+      { text: 'Daily or near-daily', sub: 'Part of my regular workflow', score: 1 },
+      { text: 'Weekly', sub: 'I use them when relevant', score: 2 },
+      { text: 'Occasionally', sub: 'Tried a few times, not a habit', score: 3 },
+      { text: 'Rarely or never', sub: 'Haven\'t really explored them', score: 4 }
+    ]
+  },
+  {
+    dim: 'agency', dimLabel: 'AI agency',
+    text: 'When you hear about a new AI capability — say, AI that can read medical scans or draft legal documents — what\'s your first instinct?',
+    opts: [
+      { text: 'Curiosity — I want to understand and try it', sub: '', score: 1 },
+      { text: 'Cautious interest — I watch how it develops', sub: '', score: 2 },
+      { text: 'Some unease — it feels like a threat', sub: '', score: 3 },
+      { text: 'Scepticism — I doubt it\'ll be as good as people claim', sub: '', score: 4 }
+    ]
+  },
+  {
+    dim: 'agency', dimLabel: 'AI agency',
+    text: 'How well do you understand what AI can and cannot currently do — specifically in your field?',
+    opts: [
+      { text: 'Well — I follow developments and can assess capabilities critically', sub: '', score: 1 },
+      { text: 'Broadly — I have a reasonable working understanding', sub: '', score: 2 },
+      { text: 'Vaguely — I know what AI is but not what it can specifically do for me', sub: '', score: 3 },
+      { text: 'Not much — it\'s largely unfamiliar territory', sub: '', score: 4 }
+    ]
+  },
+  {
+    dim: 'agency', dimLabel: 'AI agency',
+    text: 'Have you tried using AI to do something that was previously part of your job — even as an experiment?',
+    opts: [
+      { text: 'Yes, and I\'ve integrated it into how I work', sub: '', score: 1 },
+      { text: 'Yes, as a trial — with mixed results', sub: '', score: 2 },
+      { text: 'Thought about it but haven\'t tried', sub: '', score: 3 },
+      { text: 'No — haven\'t considered it for my actual work', sub: '', score: 4 }
+    ]
+  }
+];
+
+const state = { screen: 'intro', q: 0, answers: [], role: '', mode: 'individual', orgName: '' };
+
+function render() {
+  const el = document.getElementById('main');
+  const pw = document.getElementById('prog-wrap');
+  if (state.screen === 'intro') { pw.style.display = 'none'; el.innerHTML = intro(); }
+  else if (state.screen === 'q') { pw.style.display = 'block'; el.innerHTML = question(); updateProg(); }
+  else { pw.style.display = 'none'; el.innerHTML = state.mode === 'org' ? orgResults() : results(); }
+}
+
+function intro() {
+  return `<div style="display:flex;flex-direction:column;gap:12px">
+    <div class="card">
+      <div class="q-label">For individuals</div>
+      <p style="font-size:15px;color:var(--ink2);font-family:'Helvetica Neue',Arial,sans-serif;line-height:1.7;margin-bottom:1.25rem">AI is reshaping what work looks like — not by replacing people wholesale, but by absorbing tasks that feel complex to us but are learnable by AI. Find out where you stand across three dimensions that actually determine risk.</p>
+      <div class="intro-grid">
+        <div class="intro-tile"><div class="intro-tile-label">Task exposure</div><div class="intro-tile-val">What AI can absorb from your role</div></div>
+        <div class="intro-tile"><div class="intro-tile-label">Adaptability</div><div class="intro-tile-val">Your track record with change</div></div>
+        <div class="intro-tile"><div class="intro-tile-label">AI agency</div><div class="intro-tile-val">Whether you're using AI or waiting</div></div>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:6px;display:block">Your role or profession (optional)</label>
+        <input class="role-input" type="text" id="role-in" placeholder="e.g. Radiologist, HR manager, Training coordinator..." value="${state.role}">
+      </div>
+      <button class="btn-start" onclick="startIndividual()">Start individual assessment — 12 questions</button>
+    </div>
+
+    <div class="card" style="border:1.5px solid rgba(42,90,140,.2);background:var(--accent-light)">
+      <div class="q-label" style="color:var(--accent)">For organisations & institutions</div>
+      <p style="font-size:15px;color:var(--ink2);font-family:'Helvetica Neue',Arial,sans-serif;line-height:1.7;margin-bottom:1.25rem">Directors, Deans, and CEOs: assess your institution's workforce exposure, AI readiness culture, and change capacity — and understand what it means for your people and your strategy.</p>
+      <div class="intro-grid" style="margin-bottom:1.25rem">
+        <div class="intro-tile"><div class="intro-tile-label">Workforce exposure</div><div class="intro-tile-val">Which functions are most vulnerable</div></div>
+        <div class="intro-tile"><div class="intro-tile-label">AI awareness</div><div class="intro-tile-val">Where your staff and leadership stand</div></div>
+        <div class="intro-tile"><div class="intro-tile-label">Change capacity</div><div class="intro-tile-val">Your organisation's ability to move</div></div>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:6px;display:block">Organisation name (optional)</label>
+        <input class="role-input" type="text" id="org-in" placeholder="e.g. Apollo Hospitals, AIIMS, NHM Karnataka..." value="${state.orgName}" style="background:white">
+      </div>
+      <button class="btn-start" onclick="startOrg()">Start organisation assessment — 10 questions</button>
+    </div>
+  </div>`;
+}
+
+function startIndividual() {
+  state.role = document.getElementById('role-in').value;
+  state.mode = 'individual'; state.screen = 'q'; state.q = 0; state.answers = [];
+  render();
+}
+
+function startOrg() {
+  state.orgName = document.getElementById('org-in').value;
+  state.mode = 'org'; state.screen = 'q'; state.q = 0; state.answers = [];
+  render();
+}
+
+function startAssessment() {
+  state.role = document.getElementById('role-in').value;
+  state.screen = 'q';
+  state.q = 0;
+  render();
+}
+
+function question() {
+  const qs = state.mode === 'org' ? orgQuestions : questions;
+  const q = qs[state.q];
+  const letters = ['A','B','C','D'];
+  const sel = state.answers[state.q];
+  const catLabel = state.mode === 'org' ? q.cat : q.dimLabel;
+  return `<div class="card">
+    <div class="q-label">${state.q + 1} of ${qs.length} · ${catLabel}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="options">
+      ${q.opts.map((o,i) => `
+        <div class="opt ${sel===i?'sel':''}" onclick="select(${i}, true)">
+          <div class="opt-letter">${letters[i]}</div>
+          <div>
+            <div class="opt-text">${o.text}</div>
+            ${o.sub ? `<div class="opt-sub">${o.sub}</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:var(--ink3);margin-top:10px;text-align:right">Press A · B · C · D to select and advance</div>
+    <div class="nav">
+      ${state.q > 0 ? `<button class="btn-back-sm" onclick="back()">←</button>` : ''}
+      <button class="btn-next ${sel!==undefined?'ready':''}" id="btn-next" onclick="next()">
+        ${state.q < qs.length - 1 ? 'Next question →' : 'See results →'}
+      </button>
+    </div>
+  </div>`;
+}
+
+function select(i, autoAdvance) {
+  state.answers[state.q] = i;
+  if (autoAdvance) {
+    const qs = state.mode === 'org' ? orgQuestions : questions;
+    setTimeout(() => {
+      if (state.q < qs.length - 1) { state.q++; render(); }
+      else { state.screen = 'results'; render(); }
+    }, 260);
+  }
+  render();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (state.screen !== 'q') return;
+  const map = { a: 0, b: 1, c: 2, d: 3 };
+  const idx = map[e.key.toLowerCase()];
+  if (idx !== undefined) {
+    const qs = state.mode === 'org' ? orgQuestions : questions;
+    if (idx < qs[state.q].opts.length) select(idx, true);
+  }
+});
+
+function next() {
+  const qs = state.mode === 'org' ? orgQuestions : questions;
+  if (state.answers[state.q] === undefined) return;
+  if (state.q < qs.length - 1) { state.q++; render(); }
+  else { state.screen = 'results'; render(); }
+}
+
+function back() {
+  if (state.q > 0) { state.q--; render(); }
+  else { state.screen = 'intro'; render(); }
+}
+
+function updateProg() {
+  const qs = state.mode === 'org' ? orgQuestions : questions;
+  const pct = Math.round((state.q / qs.length) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `Question ${state.q + 1} of ${qs.length}`;
+}
+
+function orgResults() {
+  const cats = { 'Workforce exposure': [], 'AI awareness': [], 'Change capacity': [], 'Strategic position': [] };
+  orgQuestions.forEach((q, i) => {
+    const ans = state.answers[i];
+    if (ans !== undefined && cats[q.cat]) cats[q.cat].push(q.opts[ans].score);
+  });
+  const avg = arr => arr.length ? arr.reduce((a,b) => a+b,0) / arr.length : 0;
+  const scores = {
+    exposure: avg(cats['Workforce exposure']),
+    awareness: avg(cats['AI awareness']),
+    change: avg(cats['Change capacity']),
+    strategy: avg(cats['Strategic position'])
+  };
+  const overall = scores.exposure * 0.35 + scores.awareness * 0.25 + scores.change * 0.25 + scores.strategy * 0.15;
+
+  let riskLevel, riskClass, title, para, actions;
+  const orgStr = state.orgName ? state.orgName : 'Your organisation';
+
+  if (overall >= 3.0) {
+    riskLevel = 'High institutional risk';
+    riskClass = 'risk-urgent';
+    title = `${orgStr} is significantly exposed — and not yet positioned to respond.`;
+    para = `A large share of your workforce is doing work AI can increasingly absorb, while awareness, adoption, and change capacity are low. This combination — high exposure, low readiness — is where institutions get disrupted. The window to act proactively, rather than reactively, is now.`;
+    actions = [
+      'Commission a structured AI awareness program for leadership and key staff before attempting any technology implementation.',
+      'Map the specific roles and functions most exposed — documentation-heavy, protocol-driven, information-retrieval roles are the priority.',
+      'Build change management capacity alongside AI literacy. Technology adoption without cultural readiness fails consistently.',
+      'Develop a phased AI strategy with clear ownership — even a simple one-page position is better than silence.'
+    ];
+  } else if (overall >= 2.2) {
+    riskLevel = 'Moderate risk — transition underway';
+    riskClass = 'risk-moderate';
+    title = `${orgStr} is in the transition zone — some readiness, real gaps.`;
+    para = `You have the beginnings of awareness and some capacity to move, but your workforce exposure is real and the organisation hasn't yet coalesced around a clear direction. The transition zone is where decisions made now will determine whether you lead or follow over the next three years.`;
+    actions = [
+      'Formalise what is likely happening informally — create a structured forum for AI strategy at leadership level.',
+      'Invest in visible, credible AI education for staff now. Anxiety decreases when people understand what is and isn\'t at risk.',
+      'Identify internal champions — people already using AI tools — and give them a platform to demonstrate value.',
+      'Build a 12-month AI readiness roadmap. Phased, achievable, and tied to real workforce outcomes.'
+    ];
+  } else {
+    riskLevel = 'Relatively well positioned';
+    riskClass = 'risk-positioned';
+    title = `${orgStr} has meaningful natural resilience — with room to lead.`;
+    para = `Your workforce composition, existing awareness, and change capacity put you ahead of most peer institutions. The risk now is complacency — well-positioned organisations that don't move will find the advantage erodes quickly as AI capabilities expand into more contextual, relational work.`;
+    actions = [
+      'Formalise your AI readiness advantage into a stated strategy — name it, own it, build on it.',
+      'Your early adopters are an asset. Structure a peer learning program that spreads capability across the organisation.',
+      'Begin piloting AI tools in the highest-exposure functions. Controlled pilots build confidence and generate real evidence.',
+      'Position the organisation externally as an AI-ready institution — this has recruitment, funding, and partnership implications.'
+    ];
+  }
+
+  const color = s => s > 2.5 ? '#a33020' : s > 1.8 ? '#b8750a' : '#1D7a55';
+  const pct = s => Math.round((s - 1) / 3 * 100);
+
+  return `<div class="results">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="result-hero">
+        <div class="risk-badge ${riskClass}">${riskLevel}</div>
+        <div class="result-title">${title}</div>
+        <p class="result-para">${para}</p>
+      </div>
+
+      <div class="section-head">Four dimensions</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem">
+        ${[
+          { label: 'Workforce exposure', key: 'exposure', note: 'Higher = more of your workforce is doing AI-absorbable work' },
+          { label: 'AI awareness & adoption', key: 'awareness', note: 'Higher = lower awareness and current use among leadership and staff' },
+          { label: 'Change capacity', key: 'change', note: 'Higher = less capacity to move quickly' },
+          { label: 'Strategic position', key: 'strategy', note: 'Higher = less defined direction on AI' }
+        ].map(d => `
+          <div style="background:var(--surface);border-radius:10px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+              <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;font-weight:500;color:var(--ink)">${d.label}</span>
+              <span style="font-size:18px;font-weight:400;color:${color(scores[d.key])}">${scores[d.key].toFixed(1)}<span style="font-size:12px;color:var(--ink3)">/4</span></span>
+            </div>
+            <div class="dim-bar"><div class="dim-fill" style="width:${pct(scores[d.key])}%;background:${color(scores[d.key])}"></div></div>
+            <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:var(--ink3);margin-top:5px">${d.note}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="section-head">Recommended actions</div>
+      <div class="insight-list">
+        ${actions.map(a => `<div class="insight"><div class="insight-dot"></div><span>${a}</span></div>`).join('')}
+      </div>
+
+      <div class="section-head">Let's talk</div>
+      <div class="cta-box cta-org" style="margin-top:0">
+        <div class="cta-title">Work with Jaideep on your AI readiness</div>
+        <div class="cta-sub">I work with healthcare and training institutions on AI awareness programs, workforce readiness assessments, and change management. If this resonates — even just as a starting conversation — reach out directly on LinkedIn.</div>
+        <a class="btn-cta-primary" href="https://www.linkedin.com/in/jdrayapudi/" target="_blank">Connect on LinkedIn →</a>
+        <a class="btn-cta-sec" href="https://wa.me/918940274087" target="_blank">Message on WhatsApp →</a>
+        <a class="btn-cta-sec" href="https://www.linkedin.com/in/jdrayapudi/" target="_blank">Ask about awareness programs for your institution →</a>
+      </div>
+
+      <button class="restart" onclick="restart()">Retake or switch to individual assessment</button>
+    </div>
+    <p class="disclaimer">This assessment is a structured reflection tool for institutional planning. Results depend on the candour of responses and are intended to prompt strategic conversation, not replace it.</p>
+  </div>`;
+}
+function calcScores() {
+  const dims = { exposure: [], adaptability: [], agency: [] };
+  questions.forEach((q, i) => {
+    const ans = state.answers[i];
+    if (ans !== undefined) dims[q.dim].push(q.opts[ans].score);
+  });
+  const avg = arr => arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : 0;
+  return {
+    exposure: avg(dims.exposure),
+    adaptability: avg(dims.adaptability),
+    agency: avg(dims.agency)
+  };
+}
+
+function results() {
+  const s = calcScores();
+  const overall = (s.exposure * 0.4 + s.adaptability * 0.35 + s.agency * 0.25);
+
+  let riskLevel, riskClass, title, para, insights;
+
+  if (overall >= 3.0) {
+    riskLevel = 'Urgent attention needed';
+    riskClass = 'risk-urgent';
+    title = 'Your current position carries real risk.';
+    para = `A significant portion of what you do maps closely to what AI is already able to do — and your current relationship with AI and change means you may not be positioned to shift quickly enough. This is not a reason to panic; it is a reason to move. The people who fare worst are not those most exposed, but those most exposed who also wait.`;
+    insights = [
+      'The tasks that feel most central to your expertise may be the most automatable — because they are structured, learnable, and document-able.',
+      'Adaptability is a skill, not a trait. It can be built — but it requires deliberate practice, not just intention.',
+      'Starting with AI tools now, even imperfectly, is more valuable than waiting for clarity on what they can and cannot do.'
+    ];
+  } else if (overall >= 2.2) {
+    riskLevel = 'Moderate risk — act now';
+    riskClass = 'risk-moderate';
+    title = 'You are in the transition zone.';
+    para = `You have some natural resilience — in your adaptability, your curiosity, or your current engagement with AI — but parts of your role are genuinely exposed. The transition zone is where most people sit, and it is also where the difference between those who thrive and those who don't will be decided in the next two to three years.`;
+    insights = [
+      'Your exposure score suggests AI can absorb a meaningful portion of what you currently do — the question is whether you reposition before or after that happens.',
+      'Your adaptability gives you real runway. Use it. The capacity to learn is worth more right now than any specific skill.',
+      'Engagement with AI tools is the single highest-leverage change you can make immediately — it reframes AI from threat to collaborator.'
+    ];
+  } else {
+    riskLevel = 'Well positioned';
+    riskClass = 'risk-positioned';
+    title = 'You are ahead of where most people are.';
+    para = `Your combination of lower task exposure, higher adaptability, and active engagement with AI tools puts you in a strong position. That said, "well positioned" is not permanent — the landscape is moving quickly, and the advantage belongs to those who stay actively curious rather than those who feel secure.`;
+    insights = [
+      'Your low exposure score reflects work that is contextual, relational, or genuinely unpredictable — these are durable human advantages.',
+      'Your adaptability means you are more likely to learn and leverage new tools as they emerge rather than be overtaken by them.',
+      'The opportunity for you is to become the person in your organisation who bridges the gap — between AI capability and human application.'
+    ];
+  }
+
+  const expPct = Math.round((s.exposure - 1) / 3 * 100);
+  const adpPct = Math.round((s.adaptability - 1) / 3 * 100);
+  const agePct = Math.round((s.agency - 1) / 3 * 100);
+
+  const expColor = s.exposure > 2.5 ? '#a33020' : s.exposure > 1.8 ? '#b8750a' : '#1D7a55';
+  const adpColor = s.adaptability > 2.5 ? '#a33020' : s.adaptability > 1.8 ? '#b8750a' : '#1D7a55';
+  const ageColor = s.agency > 2.5 ? '#a33020' : s.agency > 1.8 ? '#b8750a' : '#1D7a55';
+
+  const roleStr = state.role ? ` as a ${state.role}` : '';
+
+  return `<div class="results">
+    <div class="card" style="margin-bottom:1rem">
+      <div class="result-hero">
+        <div class="risk-badge ${riskClass}">${riskLevel}</div>
+        <div class="result-title">${title}</div>
+        <p class="result-para">${para}</p>
+      </div>
+
+      <div class="section-head">Your three scores${roleStr}</div>
+      <div class="dim-grid">
+        <div class="dim">
+          <div class="dim-label">Task exposure</div>
+          <div class="dim-score" style="color:${expColor}">${s.exposure.toFixed(1)}<span class="dim-max">/4</span></div>
+          <div class="dim-bar"><div class="dim-fill" style="width:${expPct}%;background:${expColor}"></div></div>
+        </div>
+        <div class="dim">
+          <div class="dim-label">Adaptability</div>
+          <div class="dim-score" style="color:${adpColor}">${s.adaptability.toFixed(1)}<span class="dim-max">/4</span></div>
+          <div class="dim-bar"><div class="dim-fill" style="width:${adpPct}%;background:${adpColor}"></div></div>
+        </div>
+        <div class="dim">
+          <div class="dim-label">AI agency</div>
+          <div class="dim-score" style="color:${ageColor}">${s.agency.toFixed(1)}<span class="dim-max">/4</span></div>
+          <div class="dim-bar"><div class="dim-fill" style="width:${agePct}%;background:${ageColor}"></div></div>
+        </div>
+      </div>
+      <p style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:var(--ink3);margin-bottom:1rem">Higher exposure score = greater task vulnerability. Higher adaptability/agency scores = lower readiness. All scores on a 1–4 scale.</p>
+
+      <div class="section-head">What this means for you</div>
+      <div class="insight-list">
+        ${insights.map(i => `<div class="insight"><div class="insight-dot"></div><span>${i}</span></div>`).join('')}
+      </div>
+
+      <div class="section-head">Next steps</div>
+
+      <div class="cta-box cta-ind">
+        <div class="cta-title">For individuals — start here</div>
+        <div class="cta-sub">A focused conversation to map your specific exposure, identify the human skills worth building, and create a 90-day plan. One conversation can reframe how you see the next three years.</div>
+        <a class="btn-cta-primary" href="https://www.linkedin.com/in/jdrayapudi/" target="_blank">Connect on LinkedIn →</a>
+        <a class="btn-cta-sec" href="https://wa.me/918940274087" target="_blank">Message on WhatsApp →</a>
+      </div>
+
+      <div class="cta-box cta-org">
+        <div class="cta-title">For organisations & institutions</div>
+        <div class="cta-sub">If you're a Director, Dean, or CEO thinking about what this means for your workforce — the conversation is different in scale but the urgency is the same. I work with healthcare and training institutions on AI awareness programs and change management.</div>
+        <a class="btn-cta-primary" href="https://www.linkedin.com/in/jdrayapudi/" target="_blank">Reach out on LinkedIn →</a>
+        <a class="btn-cta-sec" href="https://wa.me/918940274087" target="_blank">Message on WhatsApp →</a>
+      </div>
+
+      <button class="restart" onclick="restart()">Retake the assessment</button>
+    </div>
+    <p class="disclaimer">This assessment is a structured reflection tool, not a precise prediction. The intent is to surface patterns worth thinking about — not to generate alarm. Results depend on honest self-assessment.</p>
+  </div>`;
+}
+
+function restart() {
+  state.screen = 'intro'; state.q = 0; state.answers = []; state.mode = 'individual';
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
